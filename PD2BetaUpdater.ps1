@@ -1,8 +1,8 @@
 # Run this file from the ProjectD2 folder
 
 $launcher = "https://storage.googleapis.com/storage/v1/b/pd2-launcher-update/o"
-$client = "https://storage.googleapis.com/storage/v1/b/pd2-client-files/o"
-$newclient = "https://pd2-client-files.projectdiablo2.com"
+$client = "https://storage.googleapis.com/storage/v1/b/pd2-beta-client-files/o"
+$newclient = "https://pd2-beta-client-files.projectdiablo2.com"
 
 
 # Check parent directory for Game.exe (assuming it exists from base D2 install)
