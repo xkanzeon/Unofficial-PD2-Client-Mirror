@@ -4,6 +4,7 @@ $launcher = "https://storage.googleapis.com/storage/v1/b/pd2-launcher-update/o"
 $client = "https://storage.googleapis.com/storage/v1/b/pd2-client-files/o"
 $newclient = "https://pd2-client-files.projectdiablo2.com"
 
+$server = "Live"
 
 # Check parent directory for Game.exe (assuming it exists from base D2 install)
 if (!(Test-Path "$(Split-Path -Path $pwd -Parent)/Game.exe")) {
