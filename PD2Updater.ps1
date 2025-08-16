@@ -13,7 +13,7 @@ if ($server -eq "Beta") {
 
 
 # Check parent directory for Game.exe (assuming it exists from base D2 install)
-if (!(Test-Path "$(Split-Path -Path $PSScriptRoot -Parent)/Game.exe")) {
+if (!(Test-Path "$(Split-Path -Path $pwd -Parent)/Game.exe")) {
     Write-Host "Diablo install not detected. Aborting..." -ForegroundColor Red
     exit 1
 }
@@ -41,14 +41,14 @@ function Receive-Google-Bucket {
         }
 
         # Create the Live/Beta folder if it doesn't exist
-        if (!(Test-Path "$($PSScriptRoot)/$($server)/")) {
-            New-Item -ItemType Directory -Force -Path "$($PSScriptRoot)/$($server)" | Out-Null
+        if (!(Test-Path "$($pwd)/$($server)/")) {
+            New-Item -ItemType Directory -Force -Path "$($pwd)/$($server)" | Out-Null
         }
 
         $filecount = 1
         foreach ($file in $filelist) {
             try {
-                $path = "$($PSScriptRoot)/$($server)/$($file)"
+                $path = "$($pwd)/$($server)/$($file)"
                 # Check for existing file. Skip downloading if its modified time and size matches server
                 # Note: Modified time and size being used temporarily because GCS's checksums are a pain in PS
                 if (Test-Path "$($path)") {
@@ -61,14 +61,14 @@ function Receive-Google-Bucket {
                     }
                 }
                 # Make any subfolders that will be needed (e.g. Shaders)
-                if (!(Test-Path "$($PSScriptRoot)/$($server)/$(Split-Path $($file) -Parent)")) {
-                    New-Item -ItemType Directory -Path "$($PSScriptRoot)/$($server)/$(Split-Path $($file) -Parent)" -Force | Out-Null
-                    New-Item -ItemType Directory -Path "$($PSScriptRoot)/$(Split-Path $($file) -Parent)" -Force | Out-Null
+                if (!(Test-Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)")) {
+                    New-Item -ItemType Directory -Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)" -Force | Out-Null
+                    New-Item -ItemType Directory -Path "$($pwd)/$(Split-Path $($file) -Parent)" -Force | Out-Null
                 }
                 # Download file and copy to main PD2 folder
                 Write-Progress -Activity "[$('{0:d2}' -f $filecount)/$($filelist.Count)] Downloading $($file)..."
                 Start-BitsTransfer "$($urllist[$file])" "$($path)"
-                Copy-Item -Path "$($path)" -Destination "$($PSScriptRoot)/$($file)" -Force
+                Copy-Item -Path "$($path)" -Destination "$($pwd)/$($file)" -Force
                 Write-Host "[$('{0:d2}' -f $filecount)/$($filelist.Count)] Downloaded $($file)..."
                 $filecount += 1
             } catch {
@@ -97,16 +97,16 @@ function Receive-PD2-Bucket {
             $filelist[$details[1]] = $details[0]
         }
         # Create the Live/Beta folder if it doesn't exist
-        if (!(Test-Path "$($PSScriptRoot)/$($server)/")) {
-            New-Item -ItemType Directory -Force -Path "$($PSScriptRoot)/$($server)" | Out-Null
+        if (!(Test-Path "$($pwd)/$($server)/")) {
+            New-Item -ItemType Directory -Force -Path "$($pwd)/$($server)" | Out-Null
         }
 
         $filecount = 1
         $filelist.GetEnumerator().ForEach({
             try {
                 # Check for existing file. Skip downloading if its checksum matches server
-                if (Test-Path "$($PSScriptRoot)/$($server)/$($_.Key)") {
-                    $current = Get-FileHash -Algorithm MD5 "$($PSScriptRoot)/$($server)/$($_.Key)"
+                if (Test-Path "$($pwd)/$($server)/$($_.Key)") {
+                    $current = Get-FileHash -Algorithm MD5 "$($pwd)/$($server)/$($_.Key)"
                     if ($current.Hash.ToLower() -eq $_.Value.ToLower()) {
                         Write-Host "[$('{0:d2}' -f $filecount)/$($filelist.Count)] $($_.Key) already updated. Skipping..."
                         $filecount += 1
@@ -114,14 +114,14 @@ function Receive-PD2-Bucket {
                     }
                 }
                 # Make any subfolders that will be needed (e.g. Shaders)
-                if (!(Test-Path "$($PSScriptRoot)/$($server)/$(Split-Path $($file) -Parent)")) {
-                    New-Item -ItemType Directory -Path "$($PSScriptRoot)/$($server)/$(Split-Path $($file) -Parent)" -Force | Out-Null
-                    New-Item -ItemType Directory -Path "$($PSScriptRoot)/$(Split-Path $($file) -Parent)" -Force | Out-Null
+                if (!(Test-Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)")) {
+                    New-Item -ItemType Directory -Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)" -Force | Out-Null
+                    New-Item -ItemType Directory -Path "$($pwd)/$(Split-Path $($file) -Parent)" -Force | Out-Null
                 }
                 # Download file and copy to main PD2 folder
                 Write-Progress -Activity "[$('{0:d2}' -f $filecount)/$($filelist.Count)] Downloading $($_.Key)..."
-                Start-BitsTransfer "$($newclient)/$($_.Key)" "$($PSScriptRoot)/$($server)/$($_.Key)"
-                Copy-Item -Path "$($PSScriptRoot)/$($server)/$($_.Key)" -Destination "$($PSScriptRoot)/$($_.Key)"
+                Start-BitsTransfer "$($newclient)/$($_.Key)" "$($pwd)/$($server)/$($_.Key)"
+                Copy-Item -Path "$($pwd)/$($server)/$($_.Key)" -Destination "$($pwd)/$($_.Key)"
                 Write-Host "[$('{0:d2}' -f $filecount)/$($filelist.Count)] Downloaded $($_.Key)"
                 $filecount += 1
             } catch {
