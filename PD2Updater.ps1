@@ -1,6 +1,7 @@
 # Run this file from the ProjectD2 folder
-
-$server = "Live" # Live or Beta
+param (
+    [string]$server = "Live" # Live or Beta
+)
 
 $launcher = "https://storage.googleapis.com/storage/v1/b/pd2-launcher-update/o"
 $client = "https://storage.googleapis.com/storage/v1/b/pd2-client-files/o"
