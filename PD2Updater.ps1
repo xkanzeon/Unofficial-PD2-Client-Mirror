@@ -49,6 +49,7 @@ function Receive-Google-Bucket {
                     $modtime = (Get-Date -UFormat "%Y-%m-%dT%T" ((Get-Item $path).LastWriteTime.ToUniversalTime()))
                     if (((Get-Date $modtime) -ge (Get-Date $modlist[$file])) -and ($size -eq $sizelist[$file])) {
                         Write-Host "[$('{0:d2}' -f $filecount)/$($filelist.Count)] $($file) already updated. Skiping..."
+                        Copy-Item -Path "$($path)" -Destination "$($pwd)/$($file)" -Force
                         $filecount += 1
                         continue
                     }
@@ -102,6 +103,7 @@ function Receive-PD2-Bucket {
                     $current = Get-FileHash -Algorithm MD5 "$($pwd)/Live/$($_.Key)"
                     if ($current.Hash.ToLower() -eq $_.Value.ToLower()) {
                         Write-Host "[$('{0:d2}' -f $filecount)/$($filelist.Count)] $($_.Key) already updated. Skipping..."
+                        Copy-Item -Path "$($pwd)/Live/$($_.Key)" -Destination "$($pwd)/$($_.Key)"
                         $filecount += 1
                         return
                     }
@@ -134,6 +136,7 @@ Write-Host "    Downloading launcher files..."
 Receive-Google-Bucket -Filehost $launcher
 Write-Host "    Downloading main client files..."
 Receive-PD2-Bucket
+Invoke-WebRequest $newclient -OutFile "$($pwd)/local_metadata.json"
 Write-Host "    Downloading optional client files..."
 Receive-Google-Bucket -Filehost $client
 
