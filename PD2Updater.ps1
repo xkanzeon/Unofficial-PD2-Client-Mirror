@@ -143,3 +143,5 @@ Write-Host "    Downloading main client files..."
 Receive-PD2-Bucket
 Write-Host "    Downloading optional client files..."
 Receive-Google-Bucket -Filehost $client
+
+Pause
