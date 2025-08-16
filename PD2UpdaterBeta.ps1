@@ -136,7 +136,7 @@ Write-Host "    Downloading launcher files..."
 Receive-Google-Bucket -Filehost $launcher
 Write-Host "    Downloading main client files..."
 Receive-PD2-Bucket
-Invoke-WebRequest $newclient -OutFile "$($pwd)/local_metadata.json"
+Invoke-WebRequest $newclient/metadata.json -OutFile "$($pwd)/local_metadata.json"
 Write-Host "    Downloading optional client files..."
 Receive-Google-Bucket -Filehost $client
 
