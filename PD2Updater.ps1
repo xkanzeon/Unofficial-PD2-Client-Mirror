@@ -4,7 +4,6 @@ $launcher = "https://storage.googleapis.com/storage/v1/b/pd2-launcher-update/o"
 $client = "https://storage.googleapis.com/storage/v1/b/pd2-client-files/o"
 $newclient = "https://pd2-client-files.projectdiablo2.com"
 
-$server = "Live"
 
 # Check parent directory for Game.exe (assuming it exists from base D2 install)
 if (!(Test-Path "$(Split-Path -Path $pwd -Parent)/Game.exe")) {
@@ -35,14 +34,14 @@ function Receive-Google-Bucket {
         }
 
         # Create the Live/Beta folder if it doesn't exist
-        if (!(Test-Path "$($pwd)/$($server)/")) {
-            New-Item -ItemType Directory -Force -Path "$($pwd)/$($server)" | Out-Null
+        if (!(Test-Path "$($pwd)/Live/")) {
+            New-Item -ItemType Directory -Force -Path "$($pwd)/Live" | Out-Null
         }
 
         $filecount = 1
         foreach ($file in $filelist) {
             try {
-                $path = "$($pwd)/$($server)/$($file)"
+                $path = "$($pwd)/Live/$($file)"
                 # Check for existing file. Skip downloading if its modified time and size matches server
                 # Note: Modified time and size being used temporarily because GCS's checksums are a pain in PS
                 if (Test-Path "$($path)") {
@@ -55,8 +54,8 @@ function Receive-Google-Bucket {
                     }
                 }
                 # Make any subfolders that will be needed (e.g. Shaders)
-                if (!(Test-Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)")) {
-                    New-Item -ItemType Directory -Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)" -Force | Out-Null
+                if (!(Test-Path "$($pwd)/Live/$(Split-Path $($file) -Parent)")) {
+                    New-Item -ItemType Directory -Path "$($pwd)/Live/$(Split-Path $($file) -Parent)" -Force | Out-Null
                     New-Item -ItemType Directory -Path "$($pwd)/$(Split-Path $($file) -Parent)" -Force | Out-Null
                 }
                 # Download file and copy to main PD2 folder
@@ -91,16 +90,16 @@ function Receive-PD2-Bucket {
             $filelist[$details[1]] = $details[0]
         }
         # Create the Live/Beta folder if it doesn't exist
-        if (!(Test-Path "$($pwd)/$($server)/")) {
-            New-Item -ItemType Directory -Force -Path "$($pwd)/$($server)" | Out-Null
+        if (!(Test-Path "$($pwd)/Live/")) {
+            New-Item -ItemType Directory -Force -Path "$($pwd)/Live" | Out-Null
         }
 
         $filecount = 1
         $filelist.GetEnumerator().ForEach({
             try {
                 # Check for existing file. Skip downloading if its checksum matches server
-                if (Test-Path "$($pwd)/$($server)/$($_.Key)") {
-                    $current = Get-FileHash -Algorithm MD5 "$($pwd)/$($server)/$($_.Key)"
+                if (Test-Path "$($pwd)/Live/$($_.Key)") {
+                    $current = Get-FileHash -Algorithm MD5 "$($pwd)/Live/$($_.Key)"
                     if ($current.Hash.ToLower() -eq $_.Value.ToLower()) {
                         Write-Host "[$('{0:d2}' -f $filecount)/$($filelist.Count)] $($_.Key) already updated. Skipping..."
                         $filecount += 1
@@ -108,14 +107,14 @@ function Receive-PD2-Bucket {
                     }
                 }
                 # Make any subfolders that will be needed (e.g. Shaders)
-                if (!(Test-Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)")) {
-                    New-Item -ItemType Directory -Path "$($pwd)/$($server)/$(Split-Path $($file) -Parent)" -Force | Out-Null
+                if (!(Test-Path "$($pwd)/Live/$(Split-Path $($file) -Parent)")) {
+                    New-Item -ItemType Directory -Path "$($pwd)/Live/$(Split-Path $($file) -Parent)" -Force | Out-Null
                     New-Item -ItemType Directory -Path "$($pwd)/$(Split-Path $($file) -Parent)" -Force | Out-Null
                 }
                 # Download file and copy to main PD2 folder
                 Write-Progress -Activity "[$('{0:d2}' -f $filecount)/$($filelist.Count)] Downloading $($_.Key)..."
-                Start-BitsTransfer "$($newclient)/$($_.Key)" "$($pwd)/$($server)/$($_.Key)"
-                Copy-Item -Path "$($pwd)/$($server)/$($_.Key)" -Destination "$($pwd)/$($_.Key)"
+                Start-BitsTransfer "$($newclient)/$($_.Key)" "$($pwd)/Live/$($_.Key)"
+                Copy-Item -Path "$($pwd)/Live/$($_.Key)" -Destination "$($pwd)/$($_.Key)"
                 Write-Host "[$('{0:d2}' -f $filecount)/$($filelist.Count)] Downloaded $($_.Key)"
                 $filecount += 1
             } catch {
