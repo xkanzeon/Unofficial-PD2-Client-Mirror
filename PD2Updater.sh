@@ -84,6 +84,6 @@ curl "$launcher" | jq '.items'[] | jq '.selfLink' | xargs -I@ bash -c "$(declare
 echo "    downloading main client files..."
 curl "$newclient/metadata.json" | jq '.checksum'.[] | xargs -I@ bash -c "$(declare -f download_main_files) ; download_main_files $server $newclient @"
 curl "$newclient/metadata.json" -o "local_metadata.json"
-echo "    Downloading optional client files..."
-curl "$client" | jq '.items'[] | jq '.selfLink' | xargs -I@ bash -c "$(declare -f download_google_files) ; download_google_files $server @"
+# echo "    Downloading optional client files..."
+# curl "$client" | jq '.items'[] | jq '.selfLink' | xargs -I@ bash -c "$(declare -f download_google_files) ; download_google_files $server @"
 
